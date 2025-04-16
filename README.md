@@ -94,7 +94,11 @@ Alternatively, we can *think* of data augmentation as training with the original
 
 A "lifted" graph contains 4 indentical copies of the original graph *(rotated by different $\{0, \frac{\pi}{2}, \pi, \frac{3}{2}\pi\}$, respectively)*, that share the same model parameters *(ie. the $k()$ function)*.
 
-![simple_graph](./images/simple_graph.svg)  *...becomes $\ \longrightarrow \ $*  ![lifted_graph_mu_nu](./images/lifted_graph_mu_nu.svg)
+![simple_graph](./images/simple_graph.svg)
+
+*...becomes*
+
+![lifted_graph_mu_nu](./images/lifted_graph_mu_nu.svg)
 *(I will add the edges later...)*
 
 Each node in the lifted graph, $\nu$ (dark dots in the figure) corresponds to a rotated version of the original graph.
@@ -146,6 +150,9 @@ Note: We rotated the coordinates ($\vec{x}_j(\mu)-\vec{x}_i(\nu)$) by the angle 
 At the end of the computation, we can combine the embeddings we get at every orientation to get an orientation-independent version.  At the node level, it might look like this:
 
 $h_i^{(final)}\ =\sum\limits_{\theta\in\{0, \frac{pi}{2}, \pi, \frac{3}{2}\pi\}} \mathsf{h}_{\nu(i,\theta)}$
+
+Where:
+- $\nu(i,\theta)$ is the index of node $\nu$ (from the "lifted" graph) corresponding to node $i$ (from the original graph) initially rotated by $\theta$.
 
 ### Model complexity
 Model complexity is 4x as large the same as the original, non-equivariant GNN because the new message function $\mathsf{k}(\vec{x},\theta)$ depends explicitly on $\theta$, which can have 4 values.
