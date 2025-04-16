@@ -7,15 +7,20 @@ This file contains some rough notes on how you might apply rotational equivarian
 
 Many systems are rotationally inviariant.  Exploiting this symmetry can improve model performace and robustness.  Using a neural network model which exploits this symmetry guarantees that the model behaves the same way regardless of the orientation of the input data.  It also typically improves performance of the model.  Here's an example of the benefits of equivarience when applied to CNNs:
 
-### Example: Output of a CNN that lacks equivariance
+### Example 1
+The output of a conventional CNN is not rotationally invariant
 
-![](https://github.com/QUVA-Lab/escnn/raw/master/visualizations/conventional_cnn.gif)
-*(Credit: Gabriele Cesa, Leon Lang, Maurice Weiler)*
+<img src="https://github.com/QUVA-Lab/escnn/raw/master/visualizations/conventional_cnn.gif" width=700>
 
-### Output of an equivariant CNN
-![](https://github.com/QUVA-Lab/escnn/raw/master/visualizations/vectorfield.gif)
+### Example 2
+Output of an equivariant CNN
 
-Integrated circuits are symmetric with respect to 90 degree rotations.  This document explains how to exploit that symmetry.
+<img src="https://github.com/QUVA-Lab/escnn/raw/master/visualizations/vectorfield.gif" width=700>
+
+*(Credit: Maurice Weiler, Gabriele Cesa)*
+
+Integrated circuits are symmetric with respect to 90 degree rotations.
+This document explains how to exploit that symmetry.
 
 
 ## GNN notation
@@ -24,7 +29,7 @@ Integrated circuits are symmetric with respect to 90 degree rotations.  This doc
 
 General form of the update rule that most GNNs use to update their node attributes:
 
-$h'_i\ =\ \gamma\left(h_i \ , \ \bigoplus\limits_{j\in \mathcal{N}(i)}\ \phi(h_i,\ h_j,\ e_{ij}) \right)$
+$h^\prime_i\ =\ \gamma\left(h_i \ , \ \bigoplus\limits_{j\in \mathcal{N}(i)}\ \phi(h_i,\ h_j,\ e_{ij}) \right)$
 
 Where:
  - $h_i$  are node attributes.  (for circuit components and points of interest along the circuit)
@@ -41,7 +46,7 @@ Where:
 ## Introducing geometry
 In general, the 3D coordinates of each node ($\vec{x}_i, \vec{x}_j$) could affect each node and it's communication with it's neighbors.  Let's make this dependence explicit:
 
-$h'_i\ =\ \gamma\left(h_i \ , \ \bigoplus\limits_{j\in \mathcal{N}(i)}\ \phi(h_i,\ h_j,\ e_{ij},\ \vec{x}_i,\ \vec{x}_j) \right)$
+$h^\prime_i\ =\ \gamma\left(h_i \ , \ \bigoplus\limits_{j\in \mathcal{N}(i)}\ \phi(h_i,\ h_j,\ e_{ij},\ \vec{x}_i,\ \vec{x}_j) \right)$
 
 
 
@@ -49,12 +54,12 @@ $h'_i\ =\ \gamma\left(h_i \ , \ \bigoplus\limits_{j\in \mathcal{N}(i)}\ \phi(h_i
 
 Suppose only the relative position of nodes matters.  This reduces the complexity of the model because it reduces the number of arguments we need to pass to the message function:
 
-$h'_i\ =\ \gamma\left(h_i \ , \ \bigoplus\limits_{j\in \mathcal{N}(i)} \phi(h_i,\ h_j,\ e_{ij},\  \vec{x}_i-\vec{x}_j) \right)$
+$h^\prime_i\ =\ \gamma\left(h_i \ , \ \bigoplus\limits_{j\in \mathcal{N}(i)} \phi(h_i,\ h_j,\ e_{ij},\  \vec{x}_i-\vec{x}_j) \right)$
 
 
 To simplify the notation, let's assume that the message between nodes $i$ and $j$ only depends on their relative position.  I will borrow the notation used in Convolutional Neural Networks.
 
-$h'_i\ =\ \gamma\left(\sum\limits_{j\in \mathcal{N}(i)} k(\vec{x}_j-\vec{x}_i)\ h_j \right)$
+$h^\prime_i\ =\ \gamma\left(\sum\limits_{j\in \mathcal{N}(i)} k(\vec{x}_j-\vec{x}_i)\ h_j \right)$
 
 Where
 - $\mathcal{N}(i)$ denotes all nearby pixel locations (including the original pixel i).
@@ -96,27 +101,13 @@ Each node in the lifted graph, $\nu$ (dark dots in the figure) corresponds to a 
 
 Define:
 - $\theta_\nu$  is the orientation corresponding to node $\nu$ *(where $\theta_\nu \in \{0, \frac{pi}{2}, \pi, \frac{3}{2}\pi\}$)*.
-- $\mathsf{h}_{\nu}$ = The attributes of node $\nu$ if the physical location of all the nodes had been rotated by $\theta_\nu$ beforehand.  We can define $\mathsf{h}_{\nu}$ in terms of the original node attributes $h_i$ using:
+- $\mathsf{h}_{\nu}$ = The attributes of node $\nu$ if the physical location of all the nodes in the graph had been initially been rotated by $\theta_\nu$.
 
-$\mathsf{h}_{\nu}\ \equiv\ \gamma\left(\sum\limits_{j\in \mathcal{N}(i)} k(R_{\theta_\nu}(\vec{x}_j-\vec{x}_{i(\nu)})\ h_j \right)$
+Data augmentation is equivalent to updating each rotated version of the graph ($\theta$) independently.  During training, each training example is rotated and loaded into the corresponding version of the graph.  That way, all orientations of the input graph are considered.
 
-...where
-- $R_{\theta_\nu}$ is the rotation matrix corresponding to angle $\theta_\nu$
-- $i(\nu)$ is the index of node $i$ from the original graph corresponding to node $\nu$ in the "lifted" graph.
-
-If the *initial* node attributes $h_j$ also depend on the coordinates, then they must be recomputed for each angle $\theta_\nu$ as well.  *(In that case, replace $h_j$ with $h_j(\theta_\nu)$ in the equation above.)*
-
-Data augmentation is equivalent to updating each rotated version of the graph ($\theta$) independently.  During training, each training example is rotated and loaded into the corresponding version of the graph.  That way, all orientations of the input graph are considered.  But different orientations of the graph do not talk to each other during inference, but they share the same $k()$ function.
+Different orientations of the graph do not talk to each other during inference.  But they all share the same $k()$ function.
 
 ![lifted_graph_independent](./images/lifted_graph_independent.svg)
-
-Here's a version of the same update equation we used before, but using the notation of "lifted" graphs that we introduced above:
-
-$\mathsf{h}'_{\nu(i,\theta)}\ =\ \gamma\left(\sum\limits_{j\in \mathcal{N}(i)} k(R_{\theta_\nu}(\vec{x}_j-\vec{x}_{i}))\ \mathsf{h}_{\nu(j,\theta)} \right)$
-
-...where
-- $\nu(i,\theta)$ is the index of the node in the lifted graph ($\nu$) corresponding to node $i$ from original graph which has been rotated by $\theta$ *(where $\theta\in\{0, \frac{\pi}{2}, \pi, \frac{3}{2}\pi\}$)*.
-
 
 
 ## Equivariant GNNs with $C_4$ symmetry
@@ -142,9 +133,14 @@ However to satisfy *rotational equivariance*, this new kernel must obey *rotatio
 
 ![lifted_graph_v2.svg](./images/lifted_graph_v2.svg)
 
-$\mathsf{h}'_\nu\ =\ \gamma\left(\sum\limits_{\mu\in\mathcal{N}(\nu)} \mathsf{k}(R_{\theta_\nu}(\vec{x}_{j(\mu)}-\vec{x}_{i(\nu)}),\ \theta_\mu-\theta_\nu) \ \mathsf{h}_\mu \right)$
+$\mathsf{h}^\prime_\nu\ =\ \gamma\left(\sum\limits_{\mu\in\mathcal{N}(\nu)} \mathsf{k}(R_{\theta_\nu}(\vec{x}_{j(\mu)}-\vec{x}_{i(\nu)}),\ \theta_\mu-\theta_\nu) \ \mathsf{h}_\mu \right)$
 
+Where
+- $R_{\theta_\nu}$ is the rotation matrix corresponding to angle $\theta_\nu$
+- $i(\nu)$ is the index of node $i$ from the original graph corresponding to node $\nu$ in the "lifted" graph.
+  
 Note: We rotated the coordinates ($\vec{x}_j(\mu)-\vec{x}_i(\nu)$) by the angle ($\theta_\nu$) because this equation is the update rule for node $\nu$.
+
 
 ### Pooling over orientations
 At the end of the computation, we can combine the embeddings we get at every orientation to get an orientation-independent version.  At the node level, it might look like this:
@@ -163,7 +159,7 @@ The update function above ignores edge attributes and assumes that nodes are upd
 
 As promised, here's a more general version of the equivariant GNN node update function:
 
-$\mathsf{h}'_\nu\ =\ \gamma\left(\mathsf{h}_\nu\ ,\ \bigoplus\limits_{\mu\in\mathcal{N}(\nu)}  \ \phi\left(h_{\nu(i)},\ h_{\mu(j)},\ e_{i(\nu),j(\mu)},\ R_{\theta_\nu}(\vec{x}_{j(\mu)}-\vec{x}_{i(\nu)}),\ \theta_\mu-\theta_\nu\right) \right)$
+$\mathsf{h}^\prime_\nu\ =\ \gamma\left(\mathsf{h}_\nu\ ,\ \bigoplus\limits_{\mu\in\mathcal{N}(\nu)}  \ \phi\left(h_{\nu(i)},\ h_{\mu(j)},\ e_{i(\nu),j(\mu)},\ R_{\theta_\nu}(\vec{x}_{j(\mu)}-\vec{x}_{i(\nu)}),\ \theta_\mu-\theta_\nu\right) \right)$
 
 
 *(I have assumed that the edge attributes $e_{i,j}$ are independent of position of the nodes and are rotationally invariant.)*
