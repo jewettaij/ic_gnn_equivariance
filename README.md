@@ -5,12 +5,17 @@ This file contains some rough notes on how you might apply rotational equivarian
 
 ## Why bother?
 
-Many systems are rotationally inviariant.  Exploiting this symmetry can improve model performace and robustness.  Using a rotationally equivariant model guarantees that the model behaves the same way regardless of the orientation of the input data.  Here's an example of the benefits of equivarience when applied to CNNs:
+Many systems are rotationally inviariant.  Exploiting this symmetry can improve model performace and robustness.  Using a neural network model which exploits this symmetry guarantees that the model behaves the same way regardless of the orientation of the input data.  It also typically improves performance of the model.  Here's an example of the benefits of equivarience when applied to CNNs:
+
+### Example: Output of a CNN that lacks equivariance
 
 ![](https://github.com/QUVA-Lab/escnn/raw/master/visualizations/conventional_cnn.gif)
 *(Credit: Gabriele Cesa, Leon Lang, Maurice Weiler)*
 
-Integrated circuits are rotationally invariant in the XY plane, with respect to 90 degree rotations.
+### Output of an equivariant CNN
+![](https://github.com/QUVA-Lab/escnn/raw/master/visualizations/vectorfield.gif)
+
+Integrated circuits are symmetric with respect to 90 degree rotations.  This document explains how to exploit that symmetry.
 
 
 ## GNN notation
