@@ -5,10 +5,12 @@ This file contains some rough notes on how you might apply rotational equivarian
 
 ## Why bother?
 
-Rotational equivariance can improve model performace and robustness.  It guarantees that the model behaves the same way when presented with rotated data.  Here's an example of the benefits of equivarience, applied to CNNs:
+Many systems are rotationally inviariant.  Exploiting this symmetry can improve model performace and robustness.  Using a rotationally equivariant model guarantees that the model behaves the same way regardless of the orientation of the input data.  Here's an example of the benefits of equivarience when applied to CNNs:
 
-![](https://github.com/QUVA-Lab/escnn/raw/master/visualizations/vectorfield.gif)
+![](https://github.com/QUVA-Lab/escnn/raw/master/visualizations/conventional_cnn.gif)
 *(Credit: Gabriele Cesa, Leon Lang, Maurice Weiler)*
+
+Integrated circuits are rotationally invariant in the XY plane, with respect to 90 degree rotations.
 
 
 ## GNN notation
