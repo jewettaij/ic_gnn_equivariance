@@ -3,7 +3,7 @@ Rotationally equivariant graph neural networks for integrated circuits
 
 This repository contains some rough notes on how to apply rotational equivariance to a graph neural network describing an integrated circuit:
 
-[ic_gnn_equivariance.ipynb](ic_gnn_equivariance.ipynb).
+Details here: [ic_gnn_equivariance.ipynb](ic_gnn_equivariance.ipynb)
 
 
 
